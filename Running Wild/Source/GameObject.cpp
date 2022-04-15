@@ -198,7 +198,7 @@ void GameObject::SetTexture(int action)
 	case JUMPINV:
 		objTexture = LoadTexture("Assets/JumpInvicible.png");
 		srcRect.x = srcRect.w * 3;
-		break;	
+		break;
 	default:
 		break;
 	}
@@ -228,6 +228,7 @@ void GameObject::ManagePower(int onoff)
 	if (onoff)
 	{
 		check = false;
+		ready = false;
 		SetTexture(INVICIBLE);
 	}
 	else {

@@ -188,10 +188,6 @@ START:
 	SDL_Rect desTextRect;
 	SDL_Rect desCoolRect;
 
-	Uint32 invTime = SDL_GetTicks();
-	Uint32 skillCooldown = SDL_GetTicks();
-
-
 RUNNING:
 	{
 		if (!Mix_PlayingMusic()) LoadMusic();
@@ -208,12 +204,13 @@ RUNNING:
 			}
 
 			if (!player->check) frameRendered2++;
-			if (frameRendered2 == 65)
+			if (frameRendered2 == 60)
 			{
 				skill--;
 				if (skill == 0) {
 					used = true;
 					skill = SKILL + 1;
+                    player->ManagePower(0);
 				}
 				textSurface = TTF_RenderText_Solid(font, std::to_string(skill).c_str(), skill_color);
 				stexture = SDL_CreateTextureFromSurface(renderer, textSurface);
@@ -223,12 +220,13 @@ RUNNING:
 			}
 
 			if (used) frameRendered3++;
-			if (frameRendered3 == 65)
+			if (frameRendered3 == 60)
 			{
 				cool--;
 				if (cool == -2) {
 					used = false;
 					cool = COOLDOWN + 1;
+                    player->ready = true;
 				}
 				if (cool < 0) {
 					textSurface = TTF_RenderText_Solid(font, "Skill is ready !", cool_color);
@@ -251,8 +249,6 @@ RUNNING:
 
 			frameStart = SDL_GetTicks();
 
-			if (frameStart > invTime && !player->check) player->ManagePower(0);
-
 			SDL_PollEvent(&event);
 			switch (event.type) {
 			case SDL_QUIT:
@@ -263,11 +259,9 @@ RUNNING:
 					goto JUMPING;
 				}
 				else if (event.key.keysym.sym == SDLK_k) {
-					if (player->check && SDL_GetTicks() > skillCooldown)
+					if (player->check && player->ready)
 					{
 						player->ManagePower(1);
-						invTime = SDL_GetTicks() + SKILL*1000;
-						skillCooldown = invTime + COOLDOWN*1000;
 					}
 				}
 				break;
@@ -275,11 +269,9 @@ RUNNING:
 				if (event.button.button == SDL_BUTTON_LEFT)
 					goto JUMPING;
 				else if (event.button.button == SDL_BUTTON_RIGHT)
-					if (player->check && SDL_GetTicks() > skillCooldown)
+					if (player->check && player->ready)
 					{
 						player->ManagePower(1);
-						invTime = SDL_GetTicks() + SKILL * 1000;
-						skillCooldown = invTime + COOLDOWN * 1000;
 					}
 				break;
 			default:
@@ -292,7 +284,7 @@ RUNNING:
 
 			SDL_RenderCopy(renderer, background, &srcBackground, NULL);
 			SDL_RenderCopy(renderer, ftexture, NULL, &desTextRect);
-			if (skill < SKILL - 1 && skill >= 0) SDL_RenderCopy(renderer, stexture, NULL, &desSkillRect);
+			if (skill <= SKILL && skill >= 0) SDL_RenderCopy(renderer, stexture, NULL, &desSkillRect);
 			if (cool <= COOLDOWN && cool >= -2) SDL_RenderCopy(renderer, ctexture, NULL, &desCoolRect);
 
 			for (i = 0; i < num_in_screen; ++i)
@@ -343,12 +335,13 @@ JUMPING:
 			}
 
 			if (!player->check) frameRendered2++;
-			if (frameRendered2 == 65)
+			if (frameRendered2 == 60)
 			{
 				skill--;
 				if (skill == 0) {
 					used = true;
 					skill = SKILL + 1;
+                    player->ManagePower(0);
 				}
 				textSurface = TTF_RenderText_Solid(font, std::to_string(skill).c_str(), skill_color);
 				stexture = SDL_CreateTextureFromSurface(renderer, textSurface);
@@ -358,12 +351,13 @@ JUMPING:
 			}
 
 			if (used) frameRendered3++;
-			if (frameRendered3 == 65)
+			if (frameRendered3 == 60)
 			{
 				cool--;
 				if (cool == -2) {
 					used = false;
 					cool = COOLDOWN + 1;
+                    player->ready = true;
 				}
 				if (cool < 0) {
 					textSurface = TTF_RenderText_Solid(font, "Skill is ready !", cool_color);
@@ -390,20 +384,16 @@ JUMPING:
 					goto ENDGAME;
 					break;
 				case SDL_KEYDOWN:
-					if (event.key.keysym.sym == SDLK_k && player->check && SDL_GetTicks() > skillCooldown) {
+					if (event.key.keysym.sym == SDLK_k && player->check && player->ready) {
 						player->ManagePower(1);
 						player->SetTexture(12);
-						invTime = SDL_GetTicks() + SKILL * 1000;
-						skillCooldown = invTime + COOLDOWN * 1000;
 					}
 					break;
 				case SDL_MOUSEBUTTONDOWN:
-					if (event.button.button == SDL_BUTTON_RIGHT && SDL_GetTicks() > skillCooldown) {
+					if (event.button.button == SDL_BUTTON_RIGHT && player->ready) {
 						player->ManagePower(1);
 						player->SetTexture(12);
-						invTime = SDL_GetTicks() + SKILL * 1000;
-						skillCooldown = invTime + COOLDOWN * 1000;
-						}
+					}
 					break;
 				default:
 					break;
@@ -412,7 +402,7 @@ JUMPING:
 
 			SDL_RenderCopy(renderer, background, &srcBackground, NULL);
 			SDL_RenderCopy(renderer, ftexture, NULL, &desTextRect);
-			if (skill < SKILL - 1 && skill >= 0) SDL_RenderCopy(renderer, stexture, NULL, &desSkillRect);
+			if (skill <= SKILL && skill >= 0) SDL_RenderCopy(renderer, stexture, NULL, &desSkillRect);
 			if (cool <= COOLDOWN && cool >= -2) SDL_RenderCopy(renderer, ctexture, NULL, &desCoolRect);
 			for (i = 0; i < num_in_screen; ++i)
 				hinds[i]->Render();

@@ -21,6 +21,7 @@ public:
 	bool landing = false;
 	bool landed = false;
 	bool check = true;
+	bool ready = true;
 
 	GameObject(int action, int xpos, int ypos, int scale);
 	GameObject(int action, int xpos, int ypos, int totalFrame, int scale);
